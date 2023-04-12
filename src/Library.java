@@ -325,6 +325,7 @@ public class Library {
             int shelfNumberFromShelf = shelf.getShelfNumber();
             int shelfNumberFromShelves = 0;
 
+            // finds the highest shelf number in the shelves hashmap
             for (Map.Entry<String,Shelf> entry : shelves.entrySet()){ // iterator to step through shelves hashmap
                 Shelf tempShelf = entry.getValue();
                 int tempShelfNumber = tempShelf.getShelfNumber();
@@ -337,6 +338,20 @@ public class Library {
             // this if statement protects against invalid shelf numbers
             if (shelf.getShelfNumber() != (shelfNumberFromShelves + 1)){
                 shelf.setShelfNumber(shelfNumberFromShelves + 1);
+            }
+
+            // add library books to new shelf
+            for (Map.Entry<Book,Integer> entry : books.entrySet()){ // iterator to step through books hashmap
+                Book book = entry.getKey();
+                int numberOfBook = entry.getValue();
+                if (numberOfBook > MAX_BOOKS_ON_SHELF){
+                    numberOfBook = MAX_BOOKS_ON_SHELF;
+                }
+                if (book.getSubject().equals(shelf.getSubject())){
+                    for(int i = 0; i < numberOfBook; i++){
+                        shelf.addBook(book);
+                    }
+                }
             }
 
             shelves.put(shelf.getSubject(),shelf);
@@ -628,6 +643,16 @@ public class Library {
     public Code listShelves (boolean showBooks){
         if (showBooks){
             for (Map.Entry<String, Shelf> entry : shelves.entrySet()){
+                Shelf currentShelf = entry.getValue();
+                int bookCount = currentShelf.getTotalBookCount();
+                String str = "";
+                if (bookCount == 1){
+                    str = "1 book ";
+                }
+                else {
+                    str = bookCount + " books ";
+                }
+                System.out.println(str + "on shelf: " + currentShelf);
                 entry.getValue().listBooks();
             }
         }
@@ -652,7 +677,7 @@ public class Library {
         if (showBooks){
             for (Reader reader : readers){
                 String str;
-                str = reader.getName() + " (#" + reader.getCardNumber() + ") the following books: ";
+                str = reader.getName() + " (#" + reader.getCardNumber() + ") has the following books: ";
                 System.out.println(str);
                 ArrayList<Book> readerBooks = reader.getBooks();
                 System.out.print("[");

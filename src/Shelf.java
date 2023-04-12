@@ -6,6 +6,7 @@
  */
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Shelf {
     public static final int SHELF_NUMBER_ = 0;
@@ -79,6 +80,14 @@ public class Shelf {
         return bookCount;
     }
 
+    public int getTotalBookCount(){
+        int totalBookCount = 0;
+        for(Map.Entry<Book, Integer> entry : books.entrySet()){
+            totalBookCount += entry.getValue();
+        }
+        return totalBookCount;
+    }
+
     public Code addBook (Book book){
         int bookCount = 0;
 
@@ -89,12 +98,12 @@ public class Shelf {
             bookCount += 1; // update bookCount to have first book
         }
         else{
-            System.out.println(this.subject + " goes on a different shelf.");
+            System.out.println(book.getSubject() + " goes on a different shelf.");
             return Code.SHELF_SUBJECT_MISMATCH_ERROR;
         }
 
         books.put(book, bookCount); // this will execute for if and else if only
-        System.out.println(book.toString() + " added to shelf");
+        System.out.println(book.toString() + " added to shelf " + this);
         return Code.SUCCESS;
     }
 
