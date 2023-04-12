@@ -1,0 +1,71 @@
+parsing 5 books
+parsing book: 42-w-87,Hitchhikers Guide To the Galaxy,sci-fi,42,Douglas Adams,0000
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to the stacks.
+No shelf for sci-fi books
+parsing book: 42-w-87,Hitchhikers Guide To the Galaxy,sci-fi,42,Douglas Adams,0000
+2 copies of  Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 in the stacks
+No shelf for sci-fi books
+parsing book: 42-w-87,Hitchhikers Guide To the Galaxy,sci-fi,42,Douglas Adams,0000
+3 copies of  Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 in the stacks
+No shelf for sci-fi books
+parsing book: 42-w-87,Hitchhikers Guide To the Galaxy,sci-fi,42,Douglas Adams,0000
+4 copies of  Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 in the stacks
+No shelf for sci-fi books
+parsing book: 42-w-87,Hitchhikers Guide To the Galaxy,sci-fi,42,Douglas Adams,0000
+5 copies of  Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 in the stacks
+No shelf for sci-fi books
+SUCCESS
+5 copies of Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87
+
+parsing 1 shelves
+Parsing Shelf : 1,sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to shelf 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to shelf 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to shelf 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to shelf 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to shelf 1 : sci-fi
+SUCCESS
+5 books on shelf: 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 5
+
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 successfully removed from shelf sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 checked out successfully
+SUCCESS
+SUCCESS
+5 copies of Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87
+
+total books: 5
+Drew Clinkenbeard (# 1) has checked out[Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87]
+total readers: 1
+4 books on shelf: 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 4
+
+No shelf number 4 found
+No shelf for Romance books
+null
+2 : Romance
+GrimDark books go on a different shelf
+Best Served Cold by Joe Abercrombie ISBN:12345 added to the stacks.
+No shelf for GrimDark books
+Best Served Cold by Joe Abercrombie ISBN:12345 added to shelf 3 : GrimDark
+Done
+Drew Clinkenbeard(#1)  has the following books: 
+[Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87]
+1 book on shelf: 3 : GrimDark
+Best Served Cold by Joe Abercrombie ISBN:12345 1
+
+4 books on shelf: 1 : sci-fi
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 4
+
+0 books on shelf: 2 : Romance
+
+Returning Reader Drew Clinkenbeard (# 1) has checked out[Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87]
+Best Served Cold by Joe Abercrombie ISBN:12345 successfully removed from shelf GrimDark
+Best Served Cold by Joe Abercrombie ISBN:12345 checked out successfully
+Drew Clinkenbeard(#1)  has the following books: 
+[Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87, Best Served Cold by Joe Abercrombie ISBN:12345]
+Drew Clinkenbeard is returning Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87
+Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 added to shelf 1 : sci-fi
+Drew Clinkenbeard Doesn't have Hitchhikers Guide To the Galaxy by Douglas Adams ISBN:42-w-87 Checked out
+
+Process finished with exit code 0
