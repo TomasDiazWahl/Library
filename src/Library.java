@@ -4,7 +4,7 @@
  * Description: this class represents a library with books, shelves, and readers
  */
 
-// hello!
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -392,7 +392,7 @@ public class Library {
             removeBookCode = Code.SUCCESS;
         }
         else{
-            System.out.println("No copies of book: " + book + " remain");
+            System.out.println("No copies of book: " + book + " remain in the stacks.");
             removeBookCode = Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
 
@@ -617,7 +617,7 @@ public class Library {
         int numberOfBooks = 0;
 
         for (Map.Entry<Book, Integer> entry : books.entrySet()){
-            System.out.println(entry.getValue() + " copies of " + entry.getKey());
+            System.out.println(entry.getValue() + " copies of " + entry.getKey() + " remain in the stacks.");
             numberOfBooks += entry.getValue();
         }
 

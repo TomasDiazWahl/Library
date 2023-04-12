@@ -89,6 +89,7 @@ public class Shelf {
             bookCount += 1; // update bookCount to have first book
         }
         else{
+            System.out.println(this.subject + " goes on a different shelf.");
             return Code.SHELF_SUBJECT_MISMATCH_ERROR;
         }
 

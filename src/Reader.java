@@ -57,7 +57,6 @@ public class Reader {
         }
         return false;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -80,9 +79,13 @@ public class Reader {
 
     public String toString (){
         String str;
-        str = name + " (#" + cardNumber + " has checked out {";
-        for (int i = 0; i < books.size(); i++){
-            str = str + books.get(i).toString() + ", ";
+        str = name + " (#" + cardNumber + ") has checked out {";
+        if (books.isEmpty()){
+            return str + "no books}";
+        }
+        str = str + books.get(0).toString();
+        for (int i = 1; i < books.size(); i++){
+            str = ", " + str + books.get(i).toString();
         }
         str = str + "}";
         return str;
