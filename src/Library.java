@@ -225,6 +225,7 @@ public class Library {
                                 currentRecord[Reader.PHONE_]);
                         addReader(reader);
                         int bookCount = convertInt(currentRecord[Reader.BOOK_COUNT_], Code.READER_COUNT_ERROR);
+                        // this checks the number of different books this reader has (variable length record)
                         if (currentRecord.length <= (Reader.BOOK_COUNT_ + bookCount * 2)){
                             readerCode = Code.UNKNOWN_ERROR;
                         }
@@ -287,26 +288,28 @@ public class Library {
         return addBookCode;
     }
 
-    // addBookToShelf adds book to shelf
-    private Code addBookToShelf(Book book, Shelf shelf){
-        Code addBookToShelfCode = Code.UNKNOWN_ERROR;
-
-        if (shelf == null){
-            return Code.SHELF_EXISTS_ERROR;
-        }
-        if (book == null){
-            return Code.UNKNOWN_ERROR;
-        }
-
-        addBookToShelfCode = shelf.addBook(book);
-        // assignment instructions said to call returnBook in addBookToShelf, but I think this causes a logical error
-        // instead returnBook() will call addBookToShelf which is why line below is commented out
-        //addBookToShelfCode = returnBook(book);
-        if (!addBookToShelfCode.equals(Code.SUCCESS)){
-            System.out.println(addBookToShelfCode.getMessage());
-        }
-        return addBookToShelfCode;
-    }
+    // method not used as it causes unusual side effects
+//    private Code addBookToShelf(Book book, Shelf shelf){
+//        Code addBookToShelfCode = Code.UNKNOWN_ERROR;
+//        addBookToShelfCode = returnBook(book);
+//
+//        if (addBookToShelfCode.equals(Code.SUCCESS)){
+//            return addBookToShelfCode;
+//        }
+//
+//        if (shelf == null){
+//            return Code.SHELF_EXISTS_ERROR;
+//        }
+//        if (book == null){
+//            return Code.UNKNOWN_ERROR;
+//        }
+//
+//        addBookToShelfCode = shelf.addBook(book);
+//        if (!addBookToShelfCode.equals(Code.SUCCESS)){
+//            System.out.println(addBookToShelfCode.getMessage());
+//        }
+//        return addBookToShelfCode;
+//    }
 
     // addShelf method adds a shelf to the library
     public Code addShelf(String shelfSubject){
@@ -591,7 +594,57 @@ public class Library {
         return returnBookCode;
     }
 
-    public Code populateShelves(int maxBookCount){
+    public Code populateShelf(Book book, Shelf shelf){
+        Code populateShelvesCode = Code.UNKNOWN_ERROR;
+        int booksAddedCount = 0;
+        int libraryCount = books.get(book);
+        if (libraryCount == 0){
+            populateShelvesCode = Code.LIBRARY_OUT_OF_BOOKS_ERROR;
+            return populateShelvesCode;
+        }
+        populateShelvesCode = shelf.addBook(book);
+        // Transfer a book from library books to shelf
+        if (populateShelvesCode.equals(Code.SUCCESS)){
+            System.out.println("Book " + book + " added to shelf " + shelf);
+            libraryCount--;
+            books.put(book,libraryCount);
+        }
+
+
+        for (Map.Entry<Book, Integer> entry : books.entrySet()){
+            if(shelves.containsKey(entry.getKey().getSubject())){
+                int addCount = entry.getValue();
+                if(addCount > maxBookCount){
+                    addCount = maxBookCount;
+                }
+                Book bookToAdd = entry.getKey();
+                Shelf matchingShelf = shelves.get(bookToAdd.getSubject());
+                for (int i = 0; i < addCount; i++){
+                    populateShelvesCode = matchingShelf.addBook(bookToAdd);
+                    if (populateShelvesCode.equals(Code.SUCCESS)){
+                        System.out.println("Book " + bookToAdd + " added to shelf " + matchingShelf);
+                        booksAddedCount++;
+                        entry.put(bookToAdd,)
+                    }
+                    else if (populateShelvesCode.equals(Code.SHELF_EXISTS_ERROR)){
+                        System.out.println("No shelf exists for this subject: " + bookToAdd.getSubject());
+                        System.out.println("Book not added");
+                    }
+                    else if (populateShelvesCode.equals(Code.SHELF_SUBJECT_MISMATCH_ERROR)){
+                        System.out.println("Book " + bookToAdd + " subject mismatch with shelf " + matchingShelf);
+                    }
+                    else{
+                        System.out.println("Unexpected Null Book Error. Null book not added to shelf.");
+                    }
+                }
+            }
+        }
+
+        System.out.println(booksAddedCount + " book titles added to shelves");
+        return populateShelvesCode;
+    }
+
+    private Code populateShelves(int maxBookCount){
         Code populateShelvesCode = Code.UNKNOWN_ERROR;
         int booksAddedCount = 0;
 
@@ -604,10 +657,11 @@ public class Library {
                 Book bookToAdd = entry.getKey();
                 Shelf matchingShelf = shelves.get(bookToAdd.getSubject());
                 for (int i = 0; i < addCount; i++){
-                    populateShelvesCode = addBookToShelf(bookToAdd, matchingShelf);
+                    populateShelvesCode = matchingShelf.addBook(bookToAdd);
                     if (populateShelvesCode.equals(Code.SUCCESS)){
                         System.out.println("Book " + bookToAdd + " added to shelf " + matchingShelf);
                         booksAddedCount++;
+                        entry.put(bookToAdd,)
                     }
                     else if (populateShelvesCode.equals(Code.SHELF_EXISTS_ERROR)){
                         System.out.println("No shelf exists for this subject: " + bookToAdd.getSubject());
