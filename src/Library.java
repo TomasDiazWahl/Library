@@ -6,6 +6,8 @@
 
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
@@ -61,6 +63,7 @@ public class Library {
         if(initCode != Code.SUCCESS){
             return initCode;
         }
+        System.out.println("Listing books in Library:");
         listBooks();
 
         countStr = readFile.nextLine();
@@ -73,12 +76,8 @@ public class Library {
         if(initCode != Code.SUCCESS){
             return initCode;
         }
+        System.out.println("Listing shelves in Library:");
         listShelves(false);
-
-        // populate shelves with books in the library
-        // not articulated in instructions but need to match java main sample output
-        System.out.println("Populating Shelves");
-        Code errorCode = populateShelves(MAX_BOOKS_ON_SHELF);
 
         for (Shelf shelf : shelves.values()){
             System.out.println(shelf.listBooks());
@@ -94,6 +93,7 @@ public class Library {
         if(initCode != Code.SUCCESS){
             return initCode;
         }
+        System.out.println("Listing all readers:");
         listReaders();
         System.out.println(""); // need a new line
 
@@ -104,49 +104,57 @@ public class Library {
     private Code initBooks (int bookCount, Scanner scan){
         Book currentBook = null; // this will represent the current book read from the CSV file
         String[] currentRecord; // this will represent the current line / record being read
-        int currentPageCount; // this will represent the value for page number, we will read as a string and attempt to convert to an int
+        int currentPageCount = 0; // this will represent the value for page number, we will read as a string and attempt to convert to an int
         Code errorCode = Code.UNKNOWN_ERROR; // this represents our return code
         LocalDate currentDueDate; // this will represent the value for dueDate which will be read as a string and converted into a local date object
 
         System.out.println("Parsing " + bookCount + " books");
         if (bookCount < 1){ // we check to make sure that the number of records to be read is not less than 1
             errorCode = Code.LIBRARY_ERROR;
+            return errorCode;
         }
-        else{
-            for (int i = 0; i < bookCount; i++){ // for loop to read each record
-                if (!scan.hasNextLine()){ // check to make sure that there is a record to read
+
+        for (int i = 0; i < bookCount; i++){ // for loop to read each record
+            if (!scan.hasNextLine()){ // check to make sure that there is a record to read
+                errorCode = Code.UNKNOWN_ERROR;
+                return errorCode;
+            }
+
+            String bookStr = scan.nextLine();
+            System.out.println("Parsing book: " + bookStr);
+            currentRecord = bookStr.split("[,]"); // we split the record along commas and store it into a string array
+
+            if (currentRecord.length < (Book.DUE_DATE_ + 1)){ // check to make sure the record is of the length we expect
+                errorCode = Code.UNKNOWN_ERROR;
+                return errorCode;
+            }
+
+            for (int j = 0; j < currentRecord.length; j++){ // for loop to check our string array is filled with data
+                if (currentRecord[j].equals("")){
                     errorCode = Code.UNKNOWN_ERROR;
+                    return errorCode;
                 }
-                else{
-                    String bookStr = scan.nextLine();
-                    System.out.println("Parsing book: " + bookStr);
-                    currentRecord = bookStr.split("[,]"); // we split the record along commas and store it into a string array
-                    if (currentRecord.length < (Book.DUE_DATE_ + 1)){ // check to make sure the record is of the length we expect
-                        errorCode = Code.UNKNOWN_ERROR;
-                    }
-                    else{
-                        for (int j = 0; j < currentRecord.length; j++){ // for loop to check our string array is filled with data
-                            if (currentRecord[j].equals("")){
-                                errorCode = Code.UNKNOWN_ERROR;
-                                break;
-                            }
-                        }
-                    }
-                    currentPageCount = convertInt(currentRecord[Book.PAGE_COUNT_], Code.PAGE_COUNT_ERROR); // we attempt to convert string to int
-                    if (currentPageCount <= 0){
-                        errorCode = Code.PAGE_COUNT_ERROR;
-                    }
-                    currentDueDate = convertDate(currentRecord[Book.DUE_DATE_], Code.DATE_CONVERSION_ERROR); // attempt to convert christian to satanism
-                    if (currentDueDate == null){
-                        errorCode = Code.DATE_CONVERSION_ERROR;
-                    }
-                    currentBook = new Book (currentRecord[Book.ISBN_], currentRecord[Book.TITLE_], currentRecord[Book.SUBJECT_], // instantiate book from record
-                            currentPageCount, currentRecord[Book.AUTHOR_], currentDueDate);
-                    addBook(currentBook);
-                    errorCode = Code.SUCCESS;
-                }
-            } // end read record for loop
-        }
+            }
+
+            currentPageCount = convertInt(currentRecord[Book.PAGE_COUNT_], Code.PAGE_COUNT_ERROR); // we attempt to convert string to int
+            if (currentPageCount <= 0){
+                errorCode = Code.PAGE_COUNT_ERROR;
+                return errorCode;
+            }
+
+            currentDueDate = convertDate(currentRecord[Book.DUE_DATE_], Code.DATE_CONVERSION_ERROR); // attempt to convert christian to satanism
+            if (currentDueDate == null){
+                errorCode = Code.DATE_CONVERSION_ERROR;
+                return errorCode;
+            }
+
+            currentBook = new Book (currentRecord[Book.ISBN_], currentRecord[Book.TITLE_], currentRecord[Book.SUBJECT_], // instantiate book from record
+                                    currentPageCount, currentRecord[Book.AUTHOR_], currentDueDate);
+            this.addBook(currentBook);
+
+            errorCode = Code.SUCCESS;
+        } // end read record for loop
+
 
         System.out.println(errorCode.getMessage());
         return errorCode;
@@ -179,7 +187,8 @@ public class Library {
                         String shelfSubject = currentRecord[Shelf.SUBJECT_]; // get shelf subject from parsed value
                         shelfNumber = convertInt(currentRecord[Shelf.SHELF_NUMBER_], Code.SHELF_NUMBER_PARSE_ERROR);
                         currentShelf = new Shelf(shelfNumber, shelfSubject);
-                        addShelf(currentShelf);
+                        System.out.println("Populating Shelves");
+                        this.addShelf(currentShelf);
                     }
                 }
             } // end read record for loop
@@ -189,6 +198,7 @@ public class Library {
             }
             else{
                 shelfCode = Code.SUCCESS;
+                System.out.println("SUCCESS");
             }
         }
 
@@ -273,43 +283,51 @@ public class Library {
             System.out.println(newBook + " added to stacks.");
         }
 
-        if (shelves.containsKey(currentSubject)){
-            matchingSubjectShelf = shelves.get(currentSubject); // store matching subject shelf
-            matchingSubjectShelf.addBook(newBook); // add book to that shelf
-            shelves.put(currentSubject, matchingSubjectShelf);
+        Shelf matchingShelf = shelves.get(newBook.getSubject());
+        if (matchingShelf == null){
+            System.out.println("No shelf for subject " + newBook.getSubject() + " books");
             addBookCode = Code.SUCCESS;
         }
         else{
-            System.out.println("No shelf for " + newBook.getSubject() + " books");
-            addBookCode = Code.SHELF_EXISTS_ERROR;
-            // why not just call addShelf() method from right here???
+            Code populateShelfCode = populateShelf(newBook, matchingShelf);
+            switch (populateShelfCode) {
+                case UNKNOWN_ERROR, BOOK_NOT_IN_INVENTORY_ERROR -> {
+                    return populateShelfCode;
+                }
+                case SHELF_EXISTS_ERROR -> {
+                    System.out.println("No shelf for " + newBook.getSubject() + " books");
+                }
+                case SUCCESS -> {
+                    System.out.println("Book " + newBook + " added to shelf " + matchingShelf);
+                }
+            }
         }
 
         return addBookCode;
     }
 
     // method not used as it causes unusual side effects
-//    private Code addBookToShelf(Book book, Shelf shelf){
-//        Code addBookToShelfCode = Code.UNKNOWN_ERROR;
-//        addBookToShelfCode = returnBook(book);
-//
-//        if (addBookToShelfCode.equals(Code.SUCCESS)){
-//            return addBookToShelfCode;
-//        }
-//
-//        if (shelf == null){
-//            return Code.SHELF_EXISTS_ERROR;
-//        }
-//        if (book == null){
-//            return Code.UNKNOWN_ERROR;
-//        }
-//
-//        addBookToShelfCode = shelf.addBook(book);
-//        if (!addBookToShelfCode.equals(Code.SUCCESS)){
-//            System.out.println(addBookToShelfCode.getMessage());
-//        }
-//        return addBookToShelfCode;
-//    }
+    private Code addBookToShelf(Book book, Shelf shelf){
+        Code addBookToShelfCode = Code.UNKNOWN_ERROR;
+        addBookToShelfCode = returnBook(book);
+
+        if (addBookToShelfCode.equals(Code.SUCCESS)){
+            return addBookToShelfCode;
+        }
+
+        if (shelf == null){
+            return Code.SHELF_EXISTS_ERROR;
+        }
+        if (book == null){
+            return Code.UNKNOWN_ERROR;
+        }
+
+        addBookToShelfCode = shelf.addBook(book);
+        if (!addBookToShelfCode.equals(Code.SUCCESS)){
+            System.out.println(addBookToShelfCode.getMessage());
+        }
+        return addBookToShelfCode;
+    }
 
     // addShelf method adds a shelf to the library
     public Code addShelf(String shelfSubject){
@@ -318,7 +336,7 @@ public class Library {
         return addShelf(shelf);
     }
 
-    public Code addShelf(Shelf shelf){ // should be private? Could have conflicting shelf number issue
+    public Code addShelf(@NotNull Shelf shelf){ // should be private? Could have conflicting shelf number issue
         Code addShelfCode;
         if (shelves.containsKey(shelf.getSubject())){
             System.out.println("ERROR: Shelf already exists " + shelf.getSubject());
@@ -342,22 +360,11 @@ public class Library {
             if (shelf.getShelfNumber() != (shelfNumberFromShelves + 1)){
                 shelf.setShelfNumber(shelfNumberFromShelves + 1);
             }
+            shelves.put(shelf.getSubject(),shelf);
 
             // add library books to new shelf
-            for (Map.Entry<Book,Integer> entry : books.entrySet()){ // iterator to step through books hashmap
-                Book book = entry.getKey();
-                int numberOfBook = entry.getValue();
-                if (numberOfBook > MAX_BOOKS_ON_SHELF){
-                    numberOfBook = MAX_BOOKS_ON_SHELF;
-                }
-                if (book.getSubject().equals(shelf.getSubject())){
-                    for(int i = 0; i < numberOfBook; i++){
-                        shelf.addBook(book);
-                    }
-                }
-            }
+            populateShelves();
 
-            shelves.put(shelf.getSubject(),shelf);
             addShelfCode = Code.SUCCESS;
         }
 
@@ -395,32 +402,25 @@ public class Library {
         return addReaderCode;
     }
 
-    public Code removeBook(Book book){
-        Integer bookCount = 0; // this will hold the current number of books
+    private Code removeBook(Book book){
         Code removeBookCode = Code.UNKNOWN_ERROR; // return code
         Shelf matchingSubjectShelf; // shelf object that matches passed in book subject
 
-        if (books.containsKey(book)){ // check if the book is in the books HashMap in Library
-            bookCount = books.get(book); // get the current book count
-            bookCount -= 1; // update the book count
-            books.put(book, bookCount); // update the HashMap
-            // The line that follows is per the assignment instructions but uncommented line matches main.java
-            // System.out.println(bookCount + " copies of " + newBook.getTitle() + " in the stacks.");
-            System.out.println(bookCount + " copies of " + book + " remain in the stacks.");
-            removeBookCode = Code.SUCCESS;
+        // check to see if the book is on a matching shelf
+        if (!shelves.containsKey(book.getSubject())){
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
-        else{
+
+        matchingSubjectShelf = shelves.get(book.getSubject());
+        populateShelves();
+        int shelfCount = matchingSubjectShelf.getBookCount(book);
+        // if yes check the book count
+        if (shelfCount == 0){
             System.out.println("No copies of book: " + book + " remain in the stacks.");
-            removeBookCode = Code.BOOK_NOT_IN_INVENTORY_ERROR;
+            return Code.BOOK_NOT_IN_INVENTORY_ERROR;
         }
 
-        if (shelves.containsKey(book.getSubject()) && removeBookCode.equals(Code.SUCCESS)){
-            matchingSubjectShelf = shelves.get(book.getSubject()); // store matching subject shelf
-            matchingSubjectShelf.removeBook(book); // remove book from that shelf
-            removeBookCode = Code.SUCCESS;
-        }
-        // book is not on shelves but is in the library stacks. We will allow them to take out book from stacks
-
+        removeBookCode = matchingSubjectShelf.removeBook(book);
         return removeBookCode;
     }
 
@@ -463,7 +463,7 @@ public class Library {
 
         for (Map.Entry<String, Shelf> entry : shelves.entrySet()){
             num = entry.getValue().getShelfNumber();
-            if (num == shelfNumber){
+            if (num.equals(shelfNumber)){
                 return entry.getValue();
             }
         }
@@ -518,24 +518,24 @@ public class Library {
 
         // book added to reader inventory
         Reader mumenReader = readers.get(readerIndex);
-        Code tempCode = mumenReader.addBook(book);
-
-        if (!tempCode.equals(Code.SUCCESS)){
-            System.out.println("Couldn't checkout " + book);
-            return tempCode;
-        }
 
         // book removed from library inventory and shelf inventory
         Code removeBookCode = removeBook(book);
-
         if (!removeBookCode.equals(Code.SUCCESS)){
             System.out.println("Couldn't checkout " + book);
-            tempCode = mumenReader.removeBook(book);
-            if (!tempCode.equals(Code.SUCCESS)){
-                System.out.println("Serious error library may be corrupted.");
-            }
+
+            return removeBookCode;
+        }
+
+        Code tempCode = mumenReader.addBook(book);
+
+        if (!tempCode.equals(Code.SUCCESS)){
+            // add book back to library
+            this.addBook(book);
+            System.out.println("Couldn't checkout " + book);
             return tempCode;
         }
+
         return Code.SUCCESS;
     }
 
@@ -594,74 +594,61 @@ public class Library {
         return returnBookCode;
     }
 
-    public Code populateShelf(Book book, Shelf shelf){
-        Code populateShelvesCode = Code.UNKNOWN_ERROR;
-        int booksAddedCount = 0;
-        int libraryCount = books.get(book);
-        if (libraryCount == 0){
-            populateShelvesCode = Code.LIBRARY_OUT_OF_BOOKS_ERROR;
-            return populateShelvesCode;
-        }
-        populateShelvesCode = shelf.addBook(book);
-        // Transfer a book from library books to shelf
-        if (populateShelvesCode.equals(Code.SUCCESS)){
-            System.out.println("Book " + book + " added to shelf " + shelf);
-            libraryCount--;
-            books.put(book,libraryCount);
+    private Code populateShelf(Book book, Shelf shelf){
+        Code populateShelfCode = Code.UNKNOWN_ERROR;
+        if (shelf == null || book == null){
+            System.out.println("Shelf or book parameter is null");
+            return Code.UNKNOWN_ERROR;
         }
 
+        // check if the shelf exists in the library
+        if (shelves.containsKey(shelf.getSubject())){
+            if (!books.containsKey(book)){
+                return Code.BOOK_NOT_IN_INVENTORY_ERROR;
+            }
 
-        for (Map.Entry<Book, Integer> entry : books.entrySet()){
-            if(shelves.containsKey(entry.getKey().getSubject())){
-                int addCount = entry.getValue();
-                if(addCount > maxBookCount){
-                    addCount = maxBookCount;
-                }
-                Book bookToAdd = entry.getKey();
-                Shelf matchingShelf = shelves.get(bookToAdd.getSubject());
-                for (int i = 0; i < addCount; i++){
-                    populateShelvesCode = matchingShelf.addBook(bookToAdd);
-                    if (populateShelvesCode.equals(Code.SUCCESS)){
-                        System.out.println("Book " + bookToAdd + " added to shelf " + matchingShelf);
-                        booksAddedCount++;
-                        entry.put(bookToAdd,)
-                    }
-                    else if (populateShelvesCode.equals(Code.SHELF_EXISTS_ERROR)){
-                        System.out.println("No shelf exists for this subject: " + bookToAdd.getSubject());
-                        System.out.println("Book not added");
-                    }
-                    else if (populateShelvesCode.equals(Code.SHELF_SUBJECT_MISMATCH_ERROR)){
-                        System.out.println("Book " + bookToAdd + " subject mismatch with shelf " + matchingShelf);
-                    }
-                    else{
-                        System.out.println("Unexpected Null Book Error. Null book not added to shelf.");
-                    }
-                }
+            int libraryCount = books.get(book);
+
+            //check if there exists in the library to add to the shelf
+            if (libraryCount == 0){
+                populateShelfCode = Code.LIBRARY_OUT_OF_BOOKS_ERROR;
+                return populateShelfCode;
+            }
+
+            populateShelfCode = shelf.addBook(book);
+            // Transfer a book from library books to shelf
+            if (populateShelfCode.equals(Code.SUCCESS)){
+                libraryCount--;
+                books.put(book,libraryCount);
             }
         }
+        else{
+            populateShelfCode = Code.SHELF_EXISTS_ERROR;
+        }
 
-        System.out.println(booksAddedCount + " book titles added to shelves");
-        return populateShelvesCode;
+        return populateShelfCode;
     }
 
-    private Code populateShelves(int maxBookCount){
+    private Code populateShelves(){
         Code populateShelvesCode = Code.UNKNOWN_ERROR;
         int booksAddedCount = 0;
 
         for (Map.Entry<Book, Integer> entry : books.entrySet()){
+            // check to see if the current book subject matches a subject of an existing shelf
             if(shelves.containsKey(entry.getKey().getSubject())){
                 int addCount = entry.getValue();
-                if(addCount > maxBookCount){
-                    addCount = maxBookCount;
+                if(addCount > Library.MAX_BOOKS_ON_SHELF){
+                    addCount = Library.MAX_BOOKS_ON_SHELF;
                 }
+
+                // get reference to book from HashMap and reference to matching shelf from shelves HashMap
                 Book bookToAdd = entry.getKey();
                 Shelf matchingShelf = shelves.get(bookToAdd.getSubject());
+
                 for (int i = 0; i < addCount; i++){
-                    populateShelvesCode = matchingShelf.addBook(bookToAdd);
+                    populateShelvesCode =  populateShelf(bookToAdd, matchingShelf);
                     if (populateShelvesCode.equals(Code.SUCCESS)){
-                        System.out.println("Book " + bookToAdd + " added to shelf " + matchingShelf);
                         booksAddedCount++;
-                        entry.put(bookToAdd,)
                     }
                     else if (populateShelvesCode.equals(Code.SHELF_EXISTS_ERROR)){
                         System.out.println("No shelf exists for this subject: " + bookToAdd.getSubject());
