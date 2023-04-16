@@ -300,7 +300,6 @@ public class Library {
                     System.out.println("No shelf for " + newBook.getSubject() + " books");
                 }
                 case SUCCESS -> {
-                    System.out.println("Book " + newBook + " added to shelf " + matchingShelf);
                     addBookCode = Code.SUCCESS;
                 }
             }
@@ -716,6 +715,14 @@ public class Library {
 
         for (Map.Entry<Book, Integer> entry : allBooks.entrySet()){
             System.out.println(entry.getKey() + " " + entry.getValue());
+        }
+
+        System.out.println("Listing books out to readers: ");
+        for (Reader reader : readers){
+            System.out.println(reader);
+            for (Book book : reader.getBooks()){
+                numberOfBooks++;
+            }
         }
 
         // System.out.println(entry.getValue() + " copies of " + entry.getKey() + " remain in the stacks.");
