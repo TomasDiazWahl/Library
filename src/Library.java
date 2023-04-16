@@ -95,6 +95,7 @@ public class Library {
         }
         System.out.println("Listing all readers:");
         listReaders();
+        listBooks();
         System.out.println(""); // need a new line
 
         return Code.SUCCESS;
@@ -246,6 +247,7 @@ public class Library {
                                 Book verifyBook = getBookByISBN(tempIsbn);
                                 if (verifyBook != null){
                                     readerCode = checkoutBook(reader, verifyBook);
+                                    System.out.println(readerCode.getMessage());
                                 }
                                 else{
                                     System.out.println("ERROR");
@@ -363,7 +365,7 @@ public class Library {
             shelves.put(shelf.getSubject(),shelf);
 
             // add library books to new shelf
-            populateShelves();
+            populateShelves(true);
 
             addShelfCode = Code.SUCCESS;
         }
@@ -412,7 +414,7 @@ public class Library {
         }
 
         matchingSubjectShelf = shelves.get(book.getSubject());
-        populateShelves();
+        populateShelves(false);
         int shelfCount = matchingSubjectShelf.getBookCount(book);
         // if yes check the book count
         if (shelfCount == 0){
@@ -421,6 +423,12 @@ public class Library {
         }
 
         removeBookCode = matchingSubjectShelf.removeBook(book);
+        if (removeBookCode.equals(Code.SUCCESS)){
+            System.out.println(book + " successfully removed from shelf " + matchingSubjectShelf.getSubject());
+        }
+        else{
+            System.out.println(book + " failed to remove from shelf " + matchingSubjectShelf.getSubject());
+        }
         return removeBookCode;
     }
 
@@ -629,7 +637,7 @@ public class Library {
         return populateShelfCode;
     }
 
-    private Code populateShelves(){
+    private Code populateShelves(Boolean printTotalBooks){
         Code populateShelvesCode = Code.UNKNOWN_ERROR;
         int booksAddedCount = 0;
 
@@ -664,7 +672,9 @@ public class Library {
             }
         }
 
-        System.out.println(booksAddedCount + " book titles added to shelves");
+        if (printTotalBooks){
+            System.out.println(booksAddedCount + " book titles added to shelves");
+        }
         return populateShelvesCode;
     }
 
@@ -672,11 +682,27 @@ public class Library {
     public int listBooks(){
         int numberOfBooks = 0;
 
+        HashMap<Book, Integer> allBooks = new HashMap<>();
+
         for (Map.Entry<Book, Integer> entry : books.entrySet()){
-            System.out.println(entry.getValue() + " copies of " + entry.getKey() + " remain in the stacks.");
+            allBooks.put(entry.getKey(), entry.getValue());
             numberOfBooks += entry.getValue();
         }
 
+        for (Shelf shelf : shelves.values()){
+            for (Map.Entry<Book, Integer> entry : shelf.getBooks().entrySet()){
+                int numOnShelf = entry.getValue();
+                int numInLib = allBooks.get(entry.getKey());
+                allBooks.put(entry.getKey(), numInLib + numOnShelf);
+                numberOfBooks += numOnShelf + numInLib;
+            }
+        }
+
+        for (Map.Entry<Book, Integer> entry : allBooks.entrySet()){
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
+
+        // System.out.println(entry.getValue() + " copies of " + entry.getKey() + " remain in the stacks.");
         return numberOfBooks;
     }
 
