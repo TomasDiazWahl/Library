@@ -48,7 +48,7 @@ public class Library {
             System.out.println("Could not find file: " + filename);
         }
         try{
-            readFile = new Scanner(currentFile); // attempt to instatiate scanner object
+            readFile = new Scanner(currentFile); // attempt to instantiate scanner object
         } catch (FileNotFoundException e) {
             System.out.println("Could not open file "+ filename);
         }
@@ -246,7 +246,7 @@ public class Library {
                                 LocalDate tempDate = convertDate(currentRecord[j + 1], Code.DATE_CONVERSION_ERROR);
                                 Book verifyBook = getBookByISBN(tempIsbn);
                                 if (verifyBook != null){
-                                    readerCode = checkoutBook(reader, verifyBook);
+                                    readerCode = checkOutBook(reader, verifyBook);
                                     System.out.println(readerCode.getMessage());
                                 }
                                 else{
@@ -505,7 +505,7 @@ public class Library {
     }
 
     // Check out book method
-    public Code checkoutBook(Reader reader, Book book){
+    public Code checkOutBook(Reader reader, Book book){
         int readerIndex = readers.indexOf(reader);
         if (readerIndex < 0){
             System.out.println(reader.getName() + " doesn't have an account here");
