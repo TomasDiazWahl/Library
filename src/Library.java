@@ -77,11 +77,11 @@ public class Library {
             return initCode;
         }
         System.out.println("Listing shelves in Library:");
-        listShelves(false);
+        listShelves(true);
 
-        for (Shelf shelf : shelves.values()){
-            System.out.println(shelf.listBooks());
-        }
+//        for (Shelf shelf : shelves.values()){
+//            System.out.println(shelf.listBooks());
+//        }
 
         countStr = readFile.nextLine();
         readerCount  = convertInt(countStr, Code.BOOK_COUNT_ERROR);
@@ -274,8 +274,8 @@ public class Library {
             bookCount += 1; // update the book count
             books.put(newBook, bookCount); // update the HashMap
             // The line that follows is per the assignment instructions but uncommented line matches main.java
-            // System.out.println(bookCount + " copies of " + newBook.getTitle() + " in the stacks.");
-            System.out.println(bookCount + " copies of " + newBook + " in the stacks.");
+            // System.out.println(this.getBookCount(newBook) + " copies of " + newBook.getTitle() + " in the library.");
+            System.out.println(this.getBookCount(newBook) + " copies of " + newBook + " in the library.");
         }
         else{
             bookCount = 1;
@@ -301,6 +301,7 @@ public class Library {
                 }
                 case SUCCESS -> {
                     System.out.println("Book " + newBook + " added to shelf " + matchingShelf);
+                    addBookCode = Code.SUCCESS;
                 }
             }
         }
@@ -576,6 +577,7 @@ public class Library {
             if (!returnBookCode.equals(Code.SUCCESS)){
                 System.out.println("Could not return " + book);
             }
+            reader.removeBook(book);
         }
 
         return returnBookCode;
@@ -678,6 +680,20 @@ public class Library {
         return populateShelvesCode;
     }
 
+    private int getBookCount(Book book){
+        int numberOfBooks = 0;
+
+        HashMap<Book, Integer> allBooks = new HashMap<>();
+        numberOfBooks = books.get(book);
+
+        Shelf shelf = shelves.get(book.getSubject());
+        if (shelf != null){
+            numberOfBooks += shelf.getBookCount(book);
+        }
+
+        return numberOfBooks;
+    }
+
     // listBooks method lists all the books in the library
     public int listBooks(){
         int numberOfBooks = 0;
@@ -708,25 +724,27 @@ public class Library {
 
     // list shelves method
     public Code listShelves (boolean showBooks){
-        if (showBooks){
-            for (Map.Entry<String, Shelf> entry : shelves.entrySet()){
-                Shelf currentShelf = entry.getValue();
-                int bookCount = currentShelf.getTotalBookCount();
-                String str = "";
-                if (bookCount == 1){
-                    str = "1 book ";
-                }
-                else {
-                    str = bookCount + " books ";
-                }
-                System.out.println(str + "on shelf: " + currentShelf);
-                entry.getValue().listBooks();
+
+
+        for (Map.Entry<String, Shelf> entry : shelves.entrySet()){
+            Shelf currentShelf = entry.getValue();
+            if (showBooks){
+                System.out.println(currentShelf.listBooks());
             }
-        }
-        else{
-            for (Map.Entry<String, Shelf> entry : shelves.entrySet()){
-                System.out.println(entry.getValue());
+            else{
+                System.out.println(currentShelf);
             }
+
+//            int bookCount = currentShelf.getTotalBookCount();
+//            String str = "";
+//            if (bookCount == 1){
+//                str = "1 book ";
+//            }
+//            else {
+//                str = bookCount + " books ";
+//            }
+//            System.out.println(str + "on shelf: " + currentShelf);
+
         }
 
         return Code.SUCCESS;
@@ -754,6 +772,7 @@ public class Library {
                         System.out.print(", ");
                     }
                     System.out.print(book);
+                    counter++;
                 }
                 System.out.println("]");
             }
